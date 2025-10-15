@@ -1,0 +1,37 @@
+<mujoco model="mochi">
+  <compiler angle="degree" meshdir="./" />
+  <option gravity="0 0 -0.01" integrator="RK4" timestep="0.01" />
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1=".4 .6 .8" rgb2="0 0 0" width="800" height="800" />
+    <material name="balloon_mat" specular="1" shininess="0.8" reflectance="0.9" />
+    <material name="frame_mat" rgba="0.2 0.2 0.2 1" />
+    <material name="motor_mat" rgba="0.8 0.2 0.2 1" />
+    <mesh name="frame_mesh" file="frame.stl" />
+    <mesh name="motors_mesh" file="motors.stl" />
+  </asset>
+
+  <worldbody>
+    <light directional="true" pos="0 0 10" dir="0 0 -1" />
+    <geom type="plane" size="2 2 0.1" rgba=".9 .9 .9 1" />
+
+    <geom name="x_axis" type="cylinder" pos="0 0 0.02" size="0.3 0.01" axisangle="1 0 0 90"
+      rgba="1 0 0 1" />
+    <geom name="y_axis" type="cylinder" pos="0 0 0.02" size="0.3 0.01" axisangle="0 1 0 90"
+      rgba="0 1 0 1" />
+    <geom name="z_axis" type="cylinder" pos="0 0 0.02" size="0.3 0.01" axisangle="0 0 1 0"
+      rgba="0 0 1 1" />
+
+    <body name="assembly" pos="0 0 1">
+      <freejoint />
+      <!-- <geom name="frame" type="box" size="0.225 0.02 0.04" material="frame_mat" /> -->
+      <geom type="mesh" mesh="frame_mesh" />
+      <!-- <body>
+        <geom name="motor_right" type="cylinder" pos="0 0.265 0" size="0.04 0.015"
+          axisangle="1 0 0 90" material="motor_mat" />
+        <geom name="motor_left" type="cylinder" pos="0 -0.265 0" size="0.04 0.015"
+          axisangle="1 0 0 90" material="motor_mat" />
+      </body> -->
+    </body>
+  </worldbody>
+</mujoco>
