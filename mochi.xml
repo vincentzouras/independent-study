@@ -4,12 +4,12 @@
 
   <statistic center="0 0 0.5" extent="0.5" />
   <visual>
-    <global azimuth="135" elevation="-30" />
+    <global azimuth="135" elevation="10" />
   </visual>
 
   <asset>
     <texture type="skybox" builtin="gradient" rgb1=".4 .6 .8" rgb2="0 0 0" width="800" height="800" />
-    <material name="balloon_mat" specular="1" shininess="0.8" reflectance="0.9" />
+    <material name="balloon_mat" specular="1" shininess="0.8" reflectance="0.9" rgba="0.1 0.5 0.9 1" />
     <material name="frame_mat" rgba="0.2 0.2 0.2 1" />
     <material name="motors_mat" rgba="0.8 0.2 0.2 1" />
     <mesh name="frame_mesh" file="frame.stl" />
@@ -27,21 +27,37 @@
     <geom name="z_axis" type="cylinder" pos="0 0 0.02" size="0.3 0.01" axisangle="0 0 1 0"
       rgba="0 0 1 1" />
 
-    <body name="assembly" pos="0 0 0.5">
+    <geom name="test" type="box" size=".5 .5 .5" pos="1 1 1 " />
+
+    <body name="blimp" pos="0 0 1">
       <freejoint />
-      <body name="frame">
-        <geom type="mesh" mesh="frame_mesh" material="frame_mat" />
-        <!-- <geom name="frame" type="box" size="0.225 0.02 0.04" material="frame_mat" /> -->
-      </body>
-      <body name="motors">
-        <joint name="motors_axle" type="hinge" axis="1 0 0" range="-180 180" />
-        <geom type="mesh" mesh="motors_mesh" material="motors_mat" />
+      <geom name="balloon" type="sphere" size="0.5" material="balloon_mat" mass="0.050" />
+      <body name="assembly" pos="0 0 -0.52">
+        <body name="frame">
+          <site name="front_marker_site" pos="0 0.25 0" size="0.02" rgba="0 1 0 1" />
+          <geom type="mesh" mesh="frame_mesh" material="frame_mat" mass="0.1" />
+          <!-- <geom name="frame" type="box" size="0.225 0.02 0.04" material="frame_mat" /> -->
+        </body>
+        <body name="motors">
+          <joint name="motors_axle" type="hinge" axis="-1 0 0" range="-180 180" />
+          <geom type="mesh" mesh="motors_mesh" material="motors_mat" mass="0.05" />
+
+          <site name="motor_right_site" pos="0.21 0 0" size="0.01" />
+          <site name="motor_left_site" pos="-0.21 0 0" size="0.01" />
+        </body>
       </body>
     </body>
+
   </worldbody>
 
   <actuator>
     <position name="motors_servo" joint="motors_axle" kp="0.1" dampratio="1"
       ctrlrange="-3.14159 3.14159" />
+
+    <general name="motor_right_thrust" site="motor_right_site" gear="0 0 1 0 0 0" ctrlrange="-1 1"
+      forcerange="-0.3924 0.3924" /> <!-- 40g of force in Newtons -->
+    <general name="motor_left_thrust" site="motor_left_site" gear="0 0 1 0 0 0" ctrlrange="-1 1"
+      forcerange="-0.3924 0.3924" /> <!-- 40g of force in Newtons -->
+
   </actuator>
 </mujoco>
