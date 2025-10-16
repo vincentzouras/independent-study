@@ -6,7 +6,7 @@
 
   <asset>
     <texture type="skybox" builtin="gradient" rgb1=".4 .6 .8" rgb2="0 0 0" width="800" height="800" />
-    <material name="balloon_mat" specular="1" shininess="0.8" reflectance="0.9" rgba="0.1 0.5 0.9 1" />
+    <material name="balloon_mat" specular="2" shininess=".2" reflectance="0.8" rgba="0.1 0.5 0.9 1" />
     <material name="frame_mat" rgba="0.2 0.2 0.2 1" />
     <material name="motors_mat" rgba="0.8 0.2 0.2 1" />
     <mesh name="frame_mesh" file="frame.stl" />
@@ -18,34 +18,43 @@
 
   <worldbody>
     <light directional="true" pos="0 0 10" dir="0 0 -1" />
-    <geom type="plane" size="20 10 0.1" rgba=".8 .7 .5 1" />
 
-    <body name="goals_yellow">
-      <geom name="goal_yellow_circle" type="mesh" mesh="goal_circle" pos="15 5 10" euler="0 0 90"
-        rgba="1 1 0 1" />
-      <geom name="goal_yellow_square" type="mesh" mesh="goal_square" pos="12 0 10" euler="0 0 90"
-        rgba="1 1 0 1" />
-      <geom name="goal_yellow_triangle" type="mesh" mesh="goal_triangle" pos="15 -5 10"
-        euler="0 0 90"
-        rgba="1 1 0 1" />
-    </body>
-    <body name="goals_orange">
-      <geom name="goal_orange_circle" type="mesh" mesh="goal_circle" pos="-15 5 10" euler="0 0 90"
-        rgba="1 .5 0 1" />
-      <geom name="goal_orange_square" type="mesh" mesh="goal_square" pos="-12 0 10" euler="0 0 90"
-        rgba="1 .5 0 1" />
-      <geom name="goal_orange_triangle" type="mesh" mesh="goal_triangle" pos="-15 -5 10"
-        euler="0 0 90"
-        rgba="1 .5 0 1" />
+    <body name="environment">
+      <geom name="floor" type="plane" size="20 10 0.1" rgba=".8 .7 .5 1" />
+      <body name="walls">
+        <geom name="ceiling" type="box" pos="0 0 15" size="20 10 0.05" rgba="1 1 1 0.2" />
+        <geom name="wall_back" type="box" pos="-20 0 7.5" size="0.05 10 7.5" rgba="1 1 1 0.2" />
+        <geom name="wall_front" type="box" pos="20 0 7.5" size="0.05 10 7.5" rgba="1 1 1 0.2" />
+        <geom name="wall_left" type="box" pos="0 -10 7.5" size="20 0.05 7.5" rgba="1 1 1 0.2" />
+        <geom name="wall_right" type="box" pos="0 10 7.5" size="20 0.05 7.5" rgba="1 1 1 0.2" />
+      </body>
+      <body name="goals_yellow">
+        <geom name="goal_yellow_circle" type="mesh" mesh="goal_circle" pos="15 5 10" euler="0 0 90"
+          rgba="1 1 0 1" />
+        <geom name="goal_yellow_square" type="mesh" mesh="goal_square" pos="12 0 10" euler="0 0 90"
+          rgba="1 1 0 1" />
+        <geom name="goal_yellow_triangle" type="mesh" mesh="goal_triangle" pos="15 -5 10"
+          euler="0 0 90"
+          rgba="1 1 0 1" />
+      </body>
+      <body name="goals_orange">
+        <geom name="goal_orange_circle" type="mesh" mesh="goal_circle" pos="-15 5 10" euler="0 0 90"
+          rgba="1 .5 0 1" />
+        <geom name="goal_orange_square" type="mesh" mesh="goal_square" pos="-12 0 10" euler="0 0 90"
+          rgba="1 .5 0 1" />
+        <geom name="goal_orange_triangle" type="mesh" mesh="goal_triangle" pos="-15 -5 10"
+          euler="0 0 90"
+          rgba="1 .5 0 1" />
+      </body>
     </body>
 
     <body name="blimp" pos="0 0 1" gravcomp="3.2872"> <!-- buoyant force (unitless)-->
       <freejoint />
       <geom name="balloon" type="sphere" size="0.5" material="balloon_mat" density="0.167"
         fluidshape="ellipsoid" />
+      <site name="front_marker_site" pos="0 .5 0" size="0.05" rgba="0 1 0 1" />
       <body name="assembly" pos="0 0 -0.52">
         <body name="frame">
-          <site name="front_marker_site" pos="0 0.25 0" size="0.02" rgba="0 1 0 1" />
           <geom type="mesh" mesh="frame_mesh" material="frame_mat" mass="0.15" />
         </body>
 
@@ -58,9 +67,10 @@
         </body>
 
         <camera name="nicla_vision" pos="0 0 -.07" />
-        <site name="camera_site" rgba="1 1 1 1" pos="0 0 -.07" />
+        <site name="camera_site" size="0.01" rgba="1 0 1 1" pos="0 0 -.07" euler="90 180 0" />
         <site name="accelerometer_site" />
         <site name="gyro_site" />
+        <site name="ultrasonic_site" size="0.01" pos="0 .2 .05" euler="90 180 0" />
       </body>
     </body>
   </worldbody>
@@ -78,5 +88,6 @@
   <sensor>
     <accelerometer site="accelerometer_site" />
     <gyro site="gyro_site" />
+    <rangefinder site="ultrasonic_site" />
   </sensor>
 </mujoco>
