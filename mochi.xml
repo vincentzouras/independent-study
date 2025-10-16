@@ -1,7 +1,7 @@
 <mujoco model="mochi">
   <compiler angle="degree" meshdir="./" />
-  <option gravity="0 0 -9.81" integrator="implicit" timestep="0.01" density="1.2"
-    viscosity="0.00002" />
+  <option gravity="0 0 -9.81" integrator="implicit" timestep="0.01" density="1.225"
+    viscosity="0.0000181" /> <!-- density and viscosity of air -->
 
   <statistic center="0 0 0.5" extent="0.5" />
   <visual>
