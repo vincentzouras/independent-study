@@ -1,6 +1,7 @@
 <mujoco model="mochi">
   <compiler angle="degree" meshdir="./" />
-  <option gravity="0 0 0" integrator="RK4" timestep="0.01" />
+  <option gravity="0 0 -9.81" integrator="implicit" timestep="0.01" density="1.2"
+    viscosity="0.00002" />
 
   <statistic center="0 0 0.5" extent="0.5" />
   <visual>
@@ -27,16 +28,14 @@
     <geom name="z_axis" type="cylinder" pos="0 0 0.02" size="0.3 0.01" axisangle="0 0 1 0"
       rgba="0 0 1 1" />
 
-    <geom name="test" type="box" size=".5 .5 .5" pos="1 1 1 " />
-
-    <body name="blimp" pos="0 0 1">
+    <body name="blimp" pos="0 0 1" gravcomp="2.71544"> <!-- buoyant force (unitless)-->
       <freejoint />
-      <geom name="balloon" type="sphere" size="0.5" material="balloon_mat" mass="0.050" />
+      <geom name="balloon" type="sphere" size="0.5" material="balloon_mat" density="0.167"
+        fluidshape="ellipsoid" />
       <body name="assembly" pos="0 0 -0.52">
         <body name="frame">
           <site name="front_marker_site" pos="0 0.25 0" size="0.02" rgba="0 1 0 1" />
           <geom type="mesh" mesh="frame_mesh" material="frame_mat" mass="0.1" />
-          <!-- <geom name="frame" type="box" size="0.225 0.02 0.04" material="frame_mat" /> -->
         </body>
         <body name="motors">
           <joint name="motors_axle" type="hinge" axis="-1 0 0" range="-180 180" />
@@ -58,6 +57,5 @@
       forcerange="-0.3924 0.3924" /> <!-- 40g of force in Newtons -->
     <general name="motor_left_thrust" site="motor_left_site" gear="0 0 1 0 0 0" ctrlrange="-1 1"
       forcerange="-0.3924 0.3924" /> <!-- 40g of force in Newtons -->
-
   </actuator>
 </mujoco>
