@@ -1,12 +1,8 @@
 <mujoco model="mochi">
-  <compiler angle="degree" meshdir="./" />
+  <compiler angle="degree" meshdir="./" /> <!-- only for initial values, then uses radians -->
+
   <option gravity="0 0 -9.81" integrator="implicit" timestep="0.01" density="1.225"
     viscosity="0.0000181" /> <!-- density and viscosity of air -->
-
-  <statistic center="0 0 0.5" extent="0.5" />
-  <visual>
-    <global azimuth="135" elevation="10" />
-  </visual>
 
   <asset>
     <texture type="skybox" builtin="gradient" rgb1=".4 .6 .8" rgb2="0 0 0" width="800" height="800" />
@@ -15,27 +11,42 @@
     <material name="motors_mat" rgba="0.8 0.2 0.2 1" />
     <mesh name="frame_mesh" file="frame.stl" />
     <mesh name="motors_mesh" file="motors.stl" />
+    <mesh name="goal_circle" file="circle.stl" />
+    <mesh name="goal_square" file="square.stl" />
+    <mesh name="goal_triangle" file="triangle.stl" />
   </asset>
 
   <worldbody>
     <light directional="true" pos="0 0 10" dir="0 0 -1" />
-    <geom type="plane" size="2 2 0.1" rgba=".9 .9 .9 1" />
+    <geom type="plane" size="20 10 0.1" rgba=".8 .7 .5 1" />
 
-    <geom name="x_axis" type="cylinder" pos="0 0 0.02" size="0.3 0.01" axisangle="1 0 0 90"
-      rgba="1 0 0 1" />
-    <geom name="y_axis" type="cylinder" pos="0 0 0.02" size="0.3 0.01" axisangle="0 1 0 90"
-      rgba="0 1 0 1" />
-    <geom name="z_axis" type="cylinder" pos="0 0 0.02" size="0.3 0.01" axisangle="0 0 1 0"
-      rgba="0 0 1 1" />
+    <body name="goals_yellow">
+      <geom name="goal_yellow_circle" type="mesh" mesh="goal_circle" pos="15 5 10" euler="0 0 90"
+        rgba="1 1 0 1" />
+      <geom name="goal_yellow_square" type="mesh" mesh="goal_square" pos="12 0 10" euler="0 0 90"
+        rgba="1 1 0 1" />
+      <geom name="goal_yellow_triangle" type="mesh" mesh="goal_triangle" pos="15 -5 10"
+        euler="0 0 90"
+        rgba="1 1 0 1" />
+    </body>
+    <body name="goals_orange">
+      <geom name="goal_orange_circle" type="mesh" mesh="goal_circle" pos="-15 5 10" euler="0 0 90"
+        rgba="1 .5 0 1" />
+      <geom name="goal_orange_square" type="mesh" mesh="goal_square" pos="-12 0 10" euler="0 0 90"
+        rgba="1 .5 0 1" />
+      <geom name="goal_orange_triangle" type="mesh" mesh="goal_triangle" pos="-15 -5 10"
+        euler="0 0 90"
+        rgba="1 .5 0 1" />
+    </body>
 
-    <body name="blimp" pos="0 0 1" gravcomp="2.71544"> <!-- buoyant force (unitless)-->
+    <body name="blimp" pos="0 0 1" gravcomp="3.2872"> <!-- buoyant force (unitless)-->
       <freejoint />
       <geom name="balloon" type="sphere" size="0.5" material="balloon_mat" density="0.167"
         fluidshape="ellipsoid" />
       <body name="assembly" pos="0 0 -0.52">
         <body name="frame">
           <site name="front_marker_site" pos="0 0.25 0" size="0.02" rgba="0 1 0 1" />
-          <geom type="mesh" mesh="frame_mesh" material="frame_mat" mass="0.1" />
+          <geom type="mesh" mesh="frame_mesh" material="frame_mat" mass="0.15" />
         </body>
         <body name="motors">
           <joint name="motors_axle" type="hinge" axis="-1 0 0" range="-180 180" />
@@ -50,7 +61,7 @@
   </worldbody>
 
   <actuator>
-    <position name="motors_servo" joint="motors_axle" kp="0.1" dampratio="1"
+    <position name="motors_servo" joint="motors_axle" kp="0.05" dampratio="1"
       ctrlrange="-3.14159 3.14159" />
 
     <general name="motor_right_thrust" site="motor_right_site" gear="0 0 1 0 0 0" ctrlrange="-1 1"
