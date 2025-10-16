@@ -58,7 +58,9 @@
         </body>
 
         <camera name="nicla_vision" pos="0 0 -.07" />
-        <site rgba="1 1 1 1" pos="0 0 -.07" />
+        <site name="camera_site" rgba="1 1 1 1" pos="0 0 -.07" />
+        <site name="accelerometer_site" />
+        <site name="gyro_site" />
       </body>
     </body>
   </worldbody>
@@ -72,4 +74,9 @@
     <general name="motor_left_thrust" site="motor_left_site" gear="0 0 1 0 0 0" ctrlrange="-1 1"
       forcerange="-0.3924 0.3924" /> <!-- 40g of force in Newtons -->
   </actuator>
+
+  <sensor>
+    <accelerometer site="accelerometer_site" />
+    <gyro site="gyro_site" />
+  </sensor>
 </mujoco>
