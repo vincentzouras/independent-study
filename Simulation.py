@@ -17,7 +17,7 @@ key_s = False
 key_a = False
 key_d = False
 
-MAX_THRUST = 0.5
+MAX_THRUST = 1
 
 
 def init_controller(model, data):
@@ -179,19 +179,58 @@ init_controller(model, data)
 # set the controller
 mj.set_mjcb_control(controller)
 
+# get the sensor IDs and index ranges
+nicla_vision_id = model.camera("nicla_vision").id
+accelerometer_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_SENSOR, "accelerometer")
+accelerometer_index_start = model.sensor_adr[accelerometer_id]
+accelerometer_index_dim = model.sensor_dim[accelerometer_id]
+accelerometer_index_end = accelerometer_index_start + accelerometer_index_dim
+gyro_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_SENSOR, "gyro")
+gyro_index_start = model.sensor_adr[gyro_id]
+gyro_index_dim = model.sensor_dim[gyro_id]
+gyro_index_end = gyro_index_start + gyro_index_dim
+
+np.set_printoptions(suppress=True, precision=5)
+
 while not glfw.window_should_close(window):
     time_prev = data.time
 
     while data.time - time_prev < 1.0 / 60.0:
         mj.mj_step(model, data)
 
-    # get framebuffer viewport
+    accelerometer_data = data.sensordata[
+        accelerometer_index_start:accelerometer_index_end
+    ]
+    # print(accelerometer_data)
+
+    gyro_data = data.sensordata[gyro_index_start:gyro_index_end]
+    print(gyro_data)
+
+    # update scene and render
     viewport_width, viewport_height = glfw.get_framebuffer_size(window)
     viewport = mj.MjrRect(0, 0, viewport_width, viewport_height)
-
-    # Update scene and render
     mj.mjv_updateScene(model, data, opt, None, cam, mj.mjtCatBit.mjCAT_ALL.value, scene)
     mj.mjr_render(viewport, scene, context)
+
+    # update scene and render for pip view
+    pip_width, pip_height = 320, 240
+    main_width, main_height = viewport_width, viewport_height
+    pip_x = main_width - pip_width - 20  # 20 px margin from right
+    pip_y = 20  # 20 px margin from bottom
+    pip_viewport = mj.MjrRect(pip_x, pip_y, pip_width, pip_height)
+    pip_cam = mj.MjvCamera()
+    pip_cam.type = mj.mjtCamera.mjCAMERA_FIXED
+    pip_cam.fixedcamid = nicla_vision_id
+    mj.mjv_updateScene(
+        model,
+        data,
+        opt,
+        None,
+        pip_cam,
+        mj.mjtCatBit.mjCAT_ALL.value,
+        scene,
+    )
+    mj.mjr_render(pip_viewport, scene, context)
 
     # swap OpenGL buffers (blocking call due to v-sync)
     glfw.swap_buffers(window)

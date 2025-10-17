@@ -125,8 +125,8 @@
           <site name="motor_left_site" pos="-0.21 0 0" size="0.01" />
         </body>
 
-        <camera name="nicla_vision" pos="0 0 -.07" />
-        <site name="camera_site" size="0.01" rgba="1 0 1 1" pos="0 0 -.07" euler="90 180 0" />
+        <camera name="nicla_vision" pos="0 0 -.07" euler="90 0 0" />
+        <site name="camera_site" size="0.01" rgba="1 0 1 1" pos="0 0 -.07" />
         <site name="accelerometer_site" />
         <site name="gyro_site" />
         <site name="ultrasonic_site" size="0.01" pos="0 .2 .05" euler="90 180 0" />
@@ -145,8 +145,8 @@
   </actuator>
 
   <sensor>
-    <accelerometer site="accelerometer_site" />
-    <gyro site="gyro_site" />
-    <rangefinder site="ultrasonic_site" />
+    <accelerometer name="accelerometer" site="accelerometer_site" />
+    <gyro name="gyro" site="gyro_site" />
+    <rangefinder name="ultrasonic" site="ultrasonic_site" />
   </sensor>
 </mujoco>
