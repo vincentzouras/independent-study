@@ -3,10 +3,6 @@ from mujoco.glfw import glfw
 import numpy as np
 import os
 
-
-simend = 15  # simulation time
-
-
 # For callback functions
 button_left = False
 button_middle = False
@@ -14,28 +10,91 @@ button_right = False
 lastx = 0
 lasty = 0
 
+key_space = False
+key_shift = False
+key_w = False
+key_s = False
+key_a = False
+key_d = False
+
+MAX_THRUST = 0.5
+
 
 def init_controller(model, data):
-    # initialize the controller here. This function is called once, in the beginning
-    pass
+    """
+    Initializes the controller
+    """
+    global motors_servo_id, motor_right_thrust_id, motor_left_thrust_id
+    motors_servo_id = model.actuator("motors_servo").id
+    motor_right_thrust_id = model.actuator("motor_right_thrust").id
+    motor_left_thrust_id = model.actuator("motor_left_thrust").id
 
 
 def controller(model, data):
-    # put the controller here. This function is called inside the simulation.
-    pass
+    """
+    Sets actuator controls based on keyboard state.
+    """
+    data.ctrl[:] = 0  # reset controls at start of each step
+
+    if key_space:
+        data.ctrl[motors_servo_id] = 0.0
+        data.ctrl[motor_right_thrust_id] = MAX_THRUST
+        data.ctrl[motor_left_thrust_id] = MAX_THRUST
+    elif key_shift:
+        current_angle = data.joint("motors_axle").qpos[0]
+        target_angle = (
+            np.pi if abs(current_angle - np.pi) < abs(current_angle + np.pi) else -np.pi
+        )
+        data.ctrl[motors_servo_id] = target_angle
+        data.ctrl[motor_right_thrust_id] = MAX_THRUST
+        data.ctrl[motor_left_thrust_id] = MAX_THRUST
+    elif key_w:
+        data.ctrl[motors_servo_id] = np.pi / 2
+        data.ctrl[motor_right_thrust_id] = MAX_THRUST
+        data.ctrl[motor_left_thrust_id] = MAX_THRUST
+    elif key_s:
+        data.ctrl[motors_servo_id] = -np.pi / 2
+        data.ctrl[motor_right_thrust_id] = MAX_THRUST
+        data.ctrl[motor_left_thrust_id] = MAX_THRUST
+    elif key_a:
+        data.ctrl[motors_servo_id] = np.pi / 2
+        data.ctrl[motor_right_thrust_id] = MAX_THRUST
+        data.ctrl[motor_left_thrust_id] = 0.0
+    elif key_d:
+        data.ctrl[motors_servo_id] = np.pi / 2
+        data.ctrl[motor_right_thrust_id] = 0.0
+        data.ctrl[motor_left_thrust_id] = MAX_THRUST
 
 
 def keyboard(window, key, scancode, act, mods):
+    """
+    Updates global state variables based on key presses
+    """
+    global key_space, key_shift, key_w, key_s, key_a, key_d
+
+    # reset simulation
     if act == glfw.PRESS and key == glfw.KEY_BACKSPACE:
         mj.mj_resetData(model, data)
         mj.mj_forward(model, data)
 
+    # update key states on press and release
+    if key == glfw.KEY_SPACE:
+        key_space = act != glfw.RELEASE
+    elif key == glfw.KEY_LEFT_SHIFT:
+        key_shift = act != glfw.RELEASE
+    elif key == glfw.KEY_W:
+        key_w = act != glfw.RELEASE
+    elif key == glfw.KEY_S:
+        key_s = act != glfw.RELEASE
+    elif key == glfw.KEY_A:
+        key_a = act != glfw.RELEASE
+    elif key == glfw.KEY_D:
+        key_d = act != glfw.RELEASE
+
 
 def mouse_button(window, button, act, mods):
     # update button state
-    global button_left
-    global button_middle
-    global button_right
+    global button_left, button_middle, button_right
 
     button_left = glfw.get_mouse_button(window, glfw.MOUSE_BUTTON_LEFT) == glfw.PRESS
     button_middle = (
@@ -49,16 +108,11 @@ def mouse_button(window, button, act, mods):
 
 def mouse_move(window, xpos, ypos):
     # compute mouse displacement, save
-    global lastx
-    global lasty
-    global button_left
-    global button_middle
-    global button_right
+    global lastx, lasty, button_left, button_middle, button_right
 
     dx = xpos - lastx
     dy = ypos - lasty
-    lastx = xpos
-    lasty = ypos
+    lastx, lasty = xpos, ypos
 
     # no buttons down: nothing to do
     if (not button_left) and (not button_middle) and (not button_right):
@@ -102,7 +156,7 @@ opt = mj.MjvOption()  # visualization options
 
 # Init GLFW, create window, make OpenGL context current, request v-sync
 glfw.init()
-window = glfw.create_window(1200, 900, "Demo", None, None)
+window = glfw.create_window(1600, 900, "Mochi Simulation", None, None)
 glfw.make_context_current(window)
 glfw.swap_interval(1)
 
@@ -130,9 +184,6 @@ while not glfw.window_should_close(window):
 
     while data.time - time_prev < 1.0 / 60.0:
         mj.mj_step(model, data)
-
-    if data.time >= simend:
-        break
 
     # get framebuffer viewport
     viewport_width, viewport_height = glfw.get_framebuffer_size(window)
