@@ -140,12 +140,12 @@ def mouse_move(window, xpos, ypos):
     else:
         action = mj.mjtMouse.mjMOUSE_ZOOM
 
-    mj.mjv_moveCamera(model, action, dx / height, dy / height, scene, cam)
+    mj.mjv_moveCamera(model, action, dx / height, dy / height, scene_main, cam)
 
 
 def scroll(window, xoffset, yoffset):
     action = mj.mjtMouse.mjMOUSE_ZOOM
-    mj.mjv_moveCamera(model, action, 0.0, -0.05 * yoffset, scene, cam)
+    mj.mjv_moveCamera(model, action, 0.0, -0.05 * yoffset, scene_main, cam)
 
 
 # MuJoCo data structures
@@ -163,7 +163,8 @@ glfw.swap_interval(1)
 # initialize visualization data structures
 mj.mjv_defaultCamera(cam)
 mj.mjv_defaultOption(opt)
-scene = mj.MjvScene(model, maxgeom=10000)
+scene_main = mj.MjvScene(model, maxgeom=10000)
+scene_pip = mj.MjvScene(model, maxgeom=10000)  # add scene for pip view
 context = mj.MjrContext(model, mj.mjtFontScale.mjFONTSCALE_150.value)
 
 # install GLFW mouse and keyboard callbacks
@@ -181,6 +182,7 @@ mj.set_mjcb_control(controller)
 
 # get the sensor IDs and index ranges
 nicla_vision_id = model.camera("nicla_vision").id
+ultrasonic_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_SENSOR, "ultrasonic")
 accelerometer_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_SENSOR, "accelerometer")
 accelerometer_index_start = model.sensor_adr[accelerometer_id]
 accelerometer_index_dim = model.sensor_dim[accelerometer_id]
@@ -198,19 +200,26 @@ while not glfw.window_should_close(window):
     while data.time - time_prev < 1.0 / 60.0:
         mj.mj_step(model, data)
 
+    # get sensor data
     accelerometer_data = data.sensordata[
         accelerometer_index_start:accelerometer_index_end
     ]
     # print(accelerometer_data)
 
     gyro_data = data.sensordata[gyro_index_start:gyro_index_end]
-    print(gyro_data)
+    # print(gyro_data)
+
+    ultrasonic_data = data.sensordata[model.sensor_adr[ultrasonic_id]]
+    print(ultrasonic_data)
 
     # update scene and render
     viewport_width, viewport_height = glfw.get_framebuffer_size(window)
     viewport = mj.MjrRect(0, 0, viewport_width, viewport_height)
-    mj.mjv_updateScene(model, data, opt, None, cam, mj.mjtCatBit.mjCAT_ALL.value, scene)
-    mj.mjr_render(viewport, scene, context)
+
+    mj.mjv_updateScene(
+        model, data, opt, None, cam, mj.mjtCatBit.mjCAT_ALL.value, scene_main
+    )
+    mj.mjr_render(viewport, scene_main, context)
 
     # update scene and render for pip view
     pip_width, pip_height = 320, 240
@@ -228,9 +237,9 @@ while not glfw.window_should_close(window):
         None,
         pip_cam,
         mj.mjtCatBit.mjCAT_ALL.value,
-        scene,
+        scene_pip,
     )
-    mj.mjr_render(pip_viewport, scene, context)
+    mj.mjr_render(pip_viewport, scene_pip, context)
 
     # swap OpenGL buffers (blocking call due to v-sync)
     glfw.swap_buffers(window)
