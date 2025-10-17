@@ -129,6 +129,7 @@
         <site name="camera_site" size="0.01" rgba="1 0 1 1" pos="0 0 -.07" />
         <site name="accelerometer_site" />
         <site name="gyro_site" />
+        <site name="barometer_site" />
         <site name="ultrasonic_site" size="0.01" pos="0 .2 .05" euler="90 180 0" />
       </body>
     </body>
@@ -148,5 +149,6 @@
     <accelerometer name="accelerometer" site="accelerometer_site" />
     <gyro name="gyro" site="gyro_site" />
     <rangefinder name="ultrasonic" site="ultrasonic_site" />
+    <framepos name="barometer" objtype="site" objname="barometer_site" />
   </sensor>
 </mujoco>

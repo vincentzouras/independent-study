@@ -191,26 +191,17 @@ gyro_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_SENSOR, "gyro")
 gyro_index_start = model.sensor_adr[gyro_id]
 gyro_index_dim = model.sensor_dim[gyro_id]
 gyro_index_end = gyro_index_start + gyro_index_dim
+barometer_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_SENSOR, "barometer")
+barometer_index_start = model.sensor_adr[barometer_id]
+barometer_index_dim = model.sensor_dim[barometer_id]
+barometer_index_end = barometer_index_start + barometer_index_dim
 
-np.set_printoptions(suppress=True, precision=5)
 
 while not glfw.window_should_close(window):
     time_prev = data.time
 
     while data.time - time_prev < 1.0 / 60.0:
         mj.mj_step(model, data)
-
-    # get sensor data
-    accelerometer_data = data.sensordata[
-        accelerometer_index_start:accelerometer_index_end
-    ]
-    # print(accelerometer_data)
-
-    gyro_data = data.sensordata[gyro_index_start:gyro_index_end]
-    # print(gyro_data)
-
-    ultrasonic_data = data.sensordata[model.sensor_adr[ultrasonic_id]]
-    print(ultrasonic_data)
 
     # update scene and render
     viewport_width, viewport_height = glfw.get_framebuffer_size(window)
@@ -240,6 +231,30 @@ while not glfw.window_should_close(window):
         scene_pip,
     )
     mj.mjr_render(pip_viewport, scene_pip, context)
+
+    # get sensor data
+    accelerometer_data = data.sensordata[
+        accelerometer_index_start:accelerometer_index_end
+    ]
+    accelerometer_data[2] -= 9.81  # remove gravity
+    gyro_data = data.sensordata[gyro_index_start:gyro_index_end]
+    ultrasonic_data = data.sensordata[model.sensor_adr[ultrasonic_id]]
+    barometer_data = data.sensordata[barometer_index_end - 1]  # just the z value
+
+    sensor_data_formatted = (
+        f"Acel: {accelerometer_data[0]:8.3f}, {accelerometer_data[1]:8.3f}, {accelerometer_data[2]:8.3f} m/s^2\n"
+        f"Gyro: {gyro_data[0]:8.3f}, {gyro_data[1]:8.3f}, {gyro_data[2]:8.3f} rad/s\n"
+        f"Ultra: {ultrasonic_data:8.3f} m\n"
+        f"Baro: {barometer_data:8.3f} m"
+    )
+    mj.mjr_overlay(
+        mj.mjtFont.mjFONT_NORMAL,
+        mj.mjtGridPos.mjGRID_TOPLEFT,
+        viewport,
+        sensor_data_formatted,
+        None,
+        context,
+    )
 
     # swap OpenGL buffers (blocking call due to v-sync)
     glfw.swap_buffers(window)
